@@ -203,6 +203,21 @@ gcp-startup-stack/
    
 ---
 
+## Estimated monthly cost (demo usage)
+
+| Resource | ~Cost/month |
+|---|---|
+| Cloud Run (minimal traffic) | $0–2 |
+| Cloud SQL `db-f1-micro` | ~$7 |
+| Artifact Registry (< 1 GB) | ~$0.10 |
+| Cloud NAT | ~$1 |
+| Secret Manager | ~$0.06 |
+| Cloud Build (free tier: 120 min/day) | $0 |
+| **Total** | **~$10–12/month** |
+
+For a real client environment: Cloud SQL tier upgrade + multiple Cloud Run services = $50–200/month depending on traffic. Still 60–70% cheaper than equivalent AWS setup.
+
+---
 ## Teardown
 
 ```bash
