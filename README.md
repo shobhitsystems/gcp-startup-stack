@@ -187,7 +187,7 @@ gcp-startup-stack/
 
 ---
 
-## demo 
+## What we will show on a demo call 
 
 **Script (15 minutes):**
 
