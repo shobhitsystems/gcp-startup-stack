@@ -187,19 +187,19 @@ gcp-startup-stack/
 
 ---
 
-## What to show a client on a demo call
+## demo 
 
 **Script (15 minutes):**
 
-1. **(2 min)** Show `terraform plan` output — walk through the 9 components being created side by side with the client's existing setup (probably: nothing, or a manually-configured mess)
+1. **(2 min)** Show `terraform plan` output — walk through the 9 components being created side by side with the existing setup (probably: nothing, or a manually-configured mess)
 
-2. **(8 min)** Run `terraform apply` — let it run, talk through what each resource does while it's creating. The Cloud SQL provisioning gives you 8 minutes to explain why private IP matters, why Secret Manager beats `.env` files, why Workload Identity is better than JSON keys.
+2. **(8 min)** Run `terraform apply` — walk though each resource does while it's creating. The Cloud SQL provisioning with explaination why private IP matters, why Secret Manager beats `.env` files, why Workload Identity is better than JSON keys.
 
-3. **(2 min)** Open the live URL — show the dashboard with real env, revision, and masked secrets loaded live from Secret Manager. Say: *"This is running right now on your Google Cloud account."*
+3. **(2 min)** The live URL — dashboard with real env, revision, and masked secrets loaded live from Secret Manager. *"This is running right now on Google Cloud account."*
 
-4. **(2 min)** Make a 1-line code change, `git push`, show the Cloud Build pipeline firing automatically. Say: *"Every future deploy looks like this — tested, scanned, rolled back automatically if something breaks."*
+4. **(2 min)** With a 1-line code change, `git push`, the Cloud Build pipeline firing automatically. *"Every future deploy looks like this — tested, scanned, rolled back automatically if something breaks."*
 
-5. **(1 min)** `terraform destroy` — everything gone in 3 minutes. Say: *"And this is fully reproducible. Any environment, any time."*
+5. **(1 min)** `terraform destroy` — everything gone in 3 minutes.*"And this is fully reproducible. Any environment, any time."*
 
 ---
 
