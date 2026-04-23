@@ -4,6 +4,10 @@
 
 This is the showpiece demo. One command deploys everything a funded startup needs to run on Google Cloud — securely, with full CI/CD, ready to scale.
 
+## Architecture
+ 
+![GCP Startup Stack Architecture](architecture.svg)
+
 **What this deploys (9 components):**
 
 | Component | What it is |
