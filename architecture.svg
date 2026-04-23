@@ -1,0 +1,285 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 680" width="1000" height="680" font-family="'Segoe UI',system-ui,sans-serif">
+  <defs>
+    <style>
+      .bg        { fill: #0d1117; }
+      .card      { fill: #161b22; stroke: #30363d; stroke-width: 1.5; rx: 10; }
+      .card-teal { fill: #0d2b2b; stroke: #00d4aa; stroke-width: 1.5; }
+      .card-blue { fill: #0d1b2b; stroke: #3b7eff; stroke-width: 1.5; }
+      .card-purp { fill: #1a0d2b; stroke: #8b5cf6; stroke-width: 1.5; }
+      .card-org  { fill: #2b1a0d; stroke: #f97316; stroke-width: 1.5; }
+      .card-grn  { fill: #0d2015; stroke: #22c55e; stroke-width: 1.5; }
+      .card-red  { fill: #2b0d0d; stroke: #ef4444; stroke-width: 1.5; }
+
+      .zone      { fill: none; stroke-dasharray: 6 3; rx: 12; }
+      .zone-teal { stroke: #00d4aa; opacity: 0.4; }
+      .zone-blue { stroke: #3b7eff; opacity: 0.35; }
+
+      .label-sm  { font-size: 10px; fill: #7d8590; font-weight: 500; }
+      .label-md  { font-size: 11px; fill: #e6edf3; font-weight: 600; }
+      .label-lg  { font-size: 13px; fill: #e6edf3; font-weight: 700; }
+      .label-xl  { font-size: 15px; fill: #ffffff; font-weight: 800; letter-spacing: -0.3px; }
+      .label-teal{ fill: #00d4aa; }
+      .label-blue{ fill: #79b8ff; }
+      .label-purp{ fill: #c9b1fd; }
+      .label-org { fill: #fdba74; }
+      .label-grn { fill: #86efac; }
+      .label-dim { fill: #484f58; }
+
+      .arrow     { stroke: #30363d; stroke-width: 1.5; fill: none; marker-end: url(#arr); }
+      .arrow-teal{ stroke: #00d4aa; stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; marker-end: url(#arr-teal); }
+      .arrow-blue{ stroke: #3b7eff; stroke-width: 1.5; fill: none; marker-end: url(#arr-blue); }
+    </style>
+
+    <!-- Arrow markers -->
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#30363d"/>
+    </marker>
+    <marker id="arr-teal" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#00d4aa"/>
+    </marker>
+    <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#3b7eff"/>
+    </marker>
+
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="680" class="bg"/>
+
+  <!-- Title bar -->
+  <rect x="0" y="0" width="1000" height="52" fill="#161b22"/>
+  <line x1="0" y1="52" x2="1000" y2="52" stroke="#00d4aa" stroke-width="1" opacity="0.4"/>
+  <!-- Hexagon logo shape -->
+  <polygon points="28,10 40,17 40,31 28,38 16,31 16,17" fill="none" stroke="#00d4aa" stroke-width="1.5" stroke-linejoin="round"/>
+  <line x1="22" y1="13.5" x2="28" y2="24" stroke="#00d4aa" stroke-width="1.3" stroke-linecap="round"/>
+  <line x1="34" y1="13.5" x2="28" y2="24" stroke="#00d4aa" stroke-width="0.8" stroke-linecap="round" opacity="0.45"/>
+  <line x1="28" y1="24" x2="28" y2="38" stroke="#00d4aa" stroke-width="1.1" stroke-linecap="round" opacity="0.6"/>
+  <circle cx="28" cy="24" r="2" fill="#00d4aa"/>
+  <text x="50" y="21" class="label-xl">gcp-startup-stack</text>
+  <text x="50" y="38" class="label-sm">Production-ready GCP infrastructure · One terraform apply · ~12 minutes</text>
+  <text x="820" y="21" class="label-sm">github.com/shobhitsystems</text>
+  <text x="820" y="38" class="label-sm" style="fill:#00d4aa">Terraform ≥ 1.5 · google ~5.0</text>
+
+  <!-- ═══════════════════════════════════════════
+       GCP PROJECT BOUNDARY
+  ════════════════════════════════════════════ -->
+  <rect x="16" y="66" width="970" height="600" class="zone zone-teal" rx="12"/>
+  <text x="30" y="83" class="label-sm label-teal">GCP PROJECT</text>
+
+  <!-- ═══════════════════════════════════════════
+       GITHUB ACTIONS (outside GCP, top-left)
+  ════════════════════════════════════════════ -->
+  <rect x="34" y="90" width="148" height="72" rx="10" class="card-purp"/>
+  <text x="108" y="111" text-anchor="middle" class="label-lg label-purp">GitHub Actions</text>
+  <text x="108" y="127" text-anchor="middle" class="label-sm" style="fill:#c9b1fd">git push → trigger</text>
+  <text x="108" y="142" text-anchor="middle" class="label-sm" style="fill:#484f58">Workload Identity</text>
+  <text x="108" y="155" text-anchor="middle" class="label-sm" style="fill:#484f58">Federation (keyless)</text>
+
+  <!-- ═══════════════════════════════════════════
+       MODULE: FOUNDATION (VPC)
+  ════════════════════════════════════════════ -->
+  <rect x="34" y="180" width="410" height="320" class="zone zone-blue" rx="10"/>
+  <text x="50" y="196" class="label-sm label-blue">MODULE: foundation  ·  VPC + Private Networking</text>
+
+  <!-- VPC -->
+  <rect x="50" y="204" width="380" height="284" rx="8" fill="#0a1520" stroke="#1d3557" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="68" y="221" class="label-sm" style="fill:#3b7eff">VPC  ·  10.0.0.0/16  ·  region: asia-south1</text>
+
+  <!-- Private Subnet -->
+  <rect x="64" y="228" width="180" height="122" rx="8" fill="#111c2b" stroke="#1f3a5f" stroke-width="1"/>
+  <text x="154" y="244" text-anchor="middle" class="label-sm" style="fill:#79b8ff">Private Subnet  10.0.1.0/24</text>
+
+  <!-- Cloud Run box -->
+  <rect x="76" y="252" width="156" height="52" rx="8" class="card-teal"/>
+  <text x="154" y="272" text-anchor="middle" class="label-md">☁ Cloud Run</text>
+  <text x="154" y="288" text-anchor="middle" class="label-sm" style="fill:#00d4aa">app-service  ·  VPC connector</text>
+
+  <!-- PSA subnet label -->
+  <rect x="64" y="360" width="180" height="50" rx="8" fill="#111c2b" stroke="#1f3a5f" stroke-width="1"/>
+  <text x="154" y="378" text-anchor="middle" class="label-sm" style="fill:#79b8ff">PSA Subnet  10.0.2.0/24</text>
+  <text x="154" y="394" text-anchor="middle" class="label-sm" style="fill:#484f58">Cloud SQL private IP</text>
+
+  <!-- Cloud NAT -->
+  <rect x="264" y="228" width="154" height="52" rx="8" class="card-blue"/>
+  <text x="341" y="250" text-anchor="middle" class="label-md label-blue">Cloud NAT</text>
+  <text x="341" y="266" text-anchor="middle" class="label-sm" style="fill:#79b8ff">Outbound egress</text>
+
+  <!-- Firewall rules -->
+  <rect x="264" y="292" width="154" height="52" rx="8" class="card-red"/>
+  <text x="341" y="312" text-anchor="middle" class="label-md" style="fill:#fca5a5">🔥 Firewall Rules</text>
+  <text x="341" y="328" text-anchor="middle" class="label-sm" style="fill:#fca5a5">deny-all default</text>
+
+  <!-- Cloud Router -->
+  <rect x="264" y="356" width="154" height="52" rx="8" class="card-blue"/>
+  <text x="341" y="376" text-anchor="middle" class="label-md label-blue">Cloud Router</text>
+  <text x="341" y="392" text-anchor="middle" class="label-sm" style="fill:#79b8ff">NAT gateway config</text>
+
+  <!-- Internet -->
+  <rect x="64" y="424" width="354" height="44" rx="8" fill="#0a0a0a" stroke="#21262d" stroke-width="1"/>
+  <text x="241" y="450" text-anchor="middle" class="label-sm label-dim">🌐  Internet  ·  Public traffic → Cloud Run via HTTPS</text>
+
+  <!-- ═══════════════════════════════════════════
+       MODULE: IAM
+  ════════════════════════════════════════════ -->
+  <rect x="460" y="90" width="260" height="160" rx="10" fill="#1a1220" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="476" y="107" class="label-sm label-purp">MODULE: iam</text>
+
+  <!-- WIF Pool -->
+  <rect x="474" y="114" width="230" height="52" rx="8" class="card-purp"/>
+  <text x="589" y="134" text-anchor="middle" class="label-md label-purp">Workload Identity Pool</text>
+  <text x="589" y="150" text-anchor="middle" class="label-sm" style="fill:#c9b1fd">github-wif-pool  ·  OIDC provider</text>
+
+  <!-- Service Accounts -->
+  <rect x="474" y="176" width="108" height="60" rx="8" class="card-purp"/>
+  <text x="528" y="196" text-anchor="middle" class="label-sm label-purp">app-sa</text>
+  <text x="528" y="210" text-anchor="middle" class="label-sm" style="fill:#484f58">Cloud Run identity</text>
+  <text x="528" y="223" text-anchor="middle" class="label-sm" style="fill:#484f58">least-privilege</text>
+
+  <rect x="596" y="176" width="108" height="60" rx="8" class="card-purp"/>
+  <text x="650" y="196" text-anchor="middle" class="label-sm label-purp">cicd-sa</text>
+  <text x="650" y="210" text-anchor="middle" class="label-sm" style="fill:#484f58">Cloud Build runner</text>
+  <text x="650" y="223" text-anchor="middle" class="label-sm" style="fill:#484f58">WIF-bound</text>
+
+  <!-- ═══════════════════════════════════════════
+       MODULE: DATA
+  ════════════════════════════════════════════ -->
+  <rect x="460" y="268" width="260" height="232" rx="10" fill="#0f1d12" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="476" y="285" class="label-sm label-grn">MODULE: data</text>
+
+  <!-- Cloud SQL -->
+  <rect x="474" y="292" width="230" height="76" rx="8" class="card-grn"/>
+  <text x="589" y="313" text-anchor="middle" class="label-lg label-grn">🗄  Cloud SQL</text>
+  <text x="589" y="329" text-anchor="middle" class="label-sm" style="fill:#86efac">PostgreSQL 15  ·  private IP only</text>
+  <text x="589" y="345" text-anchor="middle" class="label-sm" style="fill:#484f58">db-f1-micro → db-n1-s2  ·  PITR on</text>
+  <text x="589" y="359" text-anchor="middle" class="label-sm" style="fill:#484f58">automated backups  ·  no public IP</text>
+
+  <!-- Secret Manager -->
+  <rect x="474" y="380" width="108" height="60" rx="8" fill="#0f1d12" stroke="#22c55e" stroke-width="1.3"/>
+  <text x="528" y="399" text-anchor="middle" class="label-sm label-grn">🔑 Secret</text>
+  <text x="528" y="413" text-anchor="middle" class="label-sm label-grn">Manager</text>
+  <text x="528" y="427" text-anchor="middle" class="label-sm" style="fill:#484f58">db-password</text>
+
+  <rect x="596" y="380" width="108" height="60" rx="8" fill="#0f1d12" stroke="#22c55e" stroke-width="1.3"/>
+  <text x="650" y="399" text-anchor="middle" class="label-sm label-grn">🔑 Secret</text>
+  <text x="650" y="413" text-anchor="middle" class="label-sm label-grn">Manager</text>
+  <text x="650" y="427" text-anchor="middle" class="label-sm" style="fill:#484f58">api-key</text>
+
+  <!-- PSC endpoint -->
+  <rect x="474" y="452" width="230" height="36" rx="8" fill="#0a1a0d" stroke="#166534" stroke-width="1"/>
+  <text x="589" y="475" text-anchor="middle" class="label-sm" style="fill:#4ade80">Private Service Connect  ·  service networking</text>
+
+  <!-- ═══════════════════════════════════════════
+       MODULE: COMPUTE
+  ════════════════════════════════════════════ -->
+  <rect x="740" y="90" width="230" height="160" rx="10" fill="#0d1b2b" stroke="#3b7eff" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="756" y="107" class="label-sm label-blue">MODULE: compute</text>
+
+  <!-- Artifact Registry -->
+  <rect x="754" y="114" width="200" height="52" rx="8" class="card-blue"/>
+  <text x="854" y="134" text-anchor="middle" class="label-md label-blue">📦 Artifact Registry</text>
+  <text x="854" y="150" text-anchor="middle" class="label-sm" style="fill:#79b8ff">Docker repo  ·  asia-south1</text>
+
+  <!-- Cloud Run (compute ref) -->
+  <rect x="754" y="178" width="200" height="60" rx="8" class="card-teal"/>
+  <text x="854" y="198" text-anchor="middle" class="label-md">☁ Cloud Run Service</text>
+  <text x="854" y="214" text-anchor="middle" class="label-sm" style="fill:#00d4aa">autoscaling  ·  0→N instances</text>
+  <text x="854" y="228" text-anchor="middle" class="label-sm" style="fill:#484f58">env vars from Secret Manager</text>
+
+  <!-- ═══════════════════════════════════════════
+       MODULE: CICD
+  ════════════════════════════════════════════ -->
+  <rect x="740" y="268" width="230" height="160" rx="10" fill="#1a1220" stroke="#f97316" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="756" y="285" class="label-sm label-org">MODULE: cicd</text>
+
+  <!-- Cloud Build -->
+  <rect x="754" y="292" width="200" height="72" rx="8" class="card-org"/>
+  <text x="854" y="315" text-anchor="middle" class="label-lg label-org">⚙ Cloud Build</text>
+  <text x="854" y="331" text-anchor="middle" class="label-sm" style="fill:#fdba74">Trigger on main branch push</text>
+  <text x="854" y="347" text-anchor="middle" class="label-sm" style="fill:#484f58">build → push → deploy</text>
+  <text x="854" y="361" text-anchor="middle" class="label-sm" style="fill:#484f58">Trivy scan ·  auto-rollback</text>
+
+  <!-- Pipeline steps -->
+  <rect x="754" y="376" width="200" height="40" rx="8" fill="#1a1220" stroke="#7c2d12" stroke-width="1"/>
+  <text x="854" y="396" text-anchor="middle" class="label-sm" style="fill:#fdba74">test → scan → build → push → run → smoke</text>
+
+  <!-- ═══════════════════════════════════════════
+       OBSERVABILITY
+  ════════════════════════════════════════════ -->
+  <rect x="34" y="520" width="396" height="130" rx="10" fill="#1a1410" stroke="#f97316" stroke-width="1" stroke-dasharray="5 3"/>
+  <text x="50" y="537" class="label-sm label-org">OBSERVABILITY</text>
+
+  <rect x="48" y="544" width="112" height="60" rx="8" class="card-org"/>
+  <text x="104" y="564" text-anchor="middle" class="label-sm label-org">💰 Budget</text>
+  <text x="104" y="578" text-anchor="middle" class="label-sm label-org">Alerts</text>
+  <text x="104" y="592" text-anchor="middle" class="label-sm" style="fill:#484f58">50/80/100%</text>
+
+  <rect x="172" y="544" width="112" height="60" rx="8" class="card-org"/>
+  <text x="228" y="564" text-anchor="middle" class="label-sm label-org">📊 Cloud</text>
+  <text x="228" y="578" text-anchor="middle" class="label-sm label-org">Monitoring</text>
+  <text x="228" y="592" text-anchor="middle" class="label-sm" style="fill:#484f58">dashboards + SLOs</text>
+
+  <rect x="296" y="544" width="122" height="60" rx="8" class="card-org"/>
+  <text x="357" y="564" text-anchor="middle" class="label-sm label-org">📋 Cloud</text>
+  <text x="357" y="578" text-anchor="middle" class="label-sm label-org">Logging</text>
+  <text x="357" y="592" text-anchor="middle" class="label-sm" style="fill:#484f58">log sink + trace</text>
+
+  <!-- uptime note -->
+  <text x="232" y="628" text-anchor="middle" class="label-sm" style="fill:#484f58">Uptime checks · Alerting policies · PagerDuty / OpsGenie webhook</text>
+
+  <!-- ═══════════════════════════════════════════
+       ENABLED APIs panel
+  ════════════════════════════════════════════ -->
+  <rect x="460" y="520" width="510" height="130" rx="10" fill="#111820" stroke="#21262d" stroke-width="1"/>
+  <text x="476" y="537" class="label-sm" style="fill:#484f58">ENABLED APIS  ·  google_project_service  (disabled on destroy: false)</text>
+  <text x="476" y="556" class="label-sm" style="fill:#30363d">compute  ·  container  ·  run  ·  cloudbuild  ·  artifactregistry  ·  sqladmin</text>
+  <text x="476" y="572" class="label-sm" style="fill:#30363d">secretmanager  ·  servicenetworking  ·  iam  ·  iamcredentials  ·  sts</text>
+  <text x="476" y="588" class="label-sm" style="fill:#30363d">monitoring  ·  logging  ·  cloudtrace  ·  billingbudgets</text>
+
+  <!-- Terraform state note -->
+  <rect x="460" y="604" width="510" height="36" rx="8" fill="#0d1117" stroke="#21262d" stroke-width="1"/>
+  <text x="715" y="627" text-anchor="middle" class="label-sm" style="fill:#00d4aa">📁  Terraform state  →  GCS bucket  (versioning + object locking)</text>
+
+  <!-- ═══════════════════════════════════════════
+       ARROWS / CONNECTIONS
+  ════════════════════════════════════════════ -->
+
+  <!-- GitHub Actions → WIF -->
+  <line x1="182" y1="126" x2="474" y2="138" class="arrow-teal"/>
+  <text x="320" y="122" text-anchor="middle" class="label-sm" style="fill:#00d4aa;font-size:9px">OIDC token  ·  no keys</text>
+
+  <!-- GitHub Actions → Cloud Build trigger -->
+  <path d="M 182 148 Q 460 148 754 326" class="arrow-teal" stroke-dasharray="4 3"/>
+  <text x="470" y="248" class="label-sm" style="fill:#c9b1fd;font-size:9px">git push → build trigger</text>
+
+  <!-- Cloud Build → Artifact Registry -->
+  <line x1="854" y1="376" x2="854" y2="250" class="arrow-blue"/>
+
+  <!-- Cloud Build → Cloud Run deploy -->
+  <path d="M 754 330 Q 680 330 680 208 Q 680 208 240 278" class="arrow-teal"/>
+
+  <!-- Cloud Run → Cloud SQL (private) -->
+  <line x1="232" y1="304" x2="474" y2="340" class="arrow"/>
+  <text x="340" y="316" text-anchor="middle" class="label-sm" style="fill:#484f58;font-size:9px">private IP  ·  PSC</text>
+
+  <!-- Cloud Run → Secret Manager -->
+  <path d="M 232 278 Q 360 278 474 410" class="arrow"/>
+  <text x="350" y="268" class="label-sm" style="fill:#484f58;font-size:9px">env secrets</text>
+
+  <!-- app-sa → Cloud Run -->
+  <line x1="528" y1="236" x2="200" y2="268" class="arrow-teal" stroke-dasharray="3 3"/>
+
+  <!-- cicd-sa → WIF -->
+  <line x1="650" y1="176" x2="630" y2="166" class="arrow-teal" stroke-dasharray="3 3"/>
+
+  <!-- Compute Cloud Run → foundation Cloud Run (same resource) -->
+  <path d="M 854 178 Q 854 148 750 148 Q 600 148 230 278" class="arrow-blue" stroke-dasharray="4 3"/>
+
+  <!-- Internet → Cloud Run -->
+  <path d="M 241 424 Q 241 446 154 446 L 154 304" class="arrow"/>
+
+</svg>
