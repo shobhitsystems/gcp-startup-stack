@@ -23,7 +23,7 @@
 #                           Add a "Required reviewers" protection rule with your username
 # ─────────────────────────────────────────────────────────────────────────────
 
-name: "Terraform Deploy"
+name: "Terraform Apply"
 
 on:
   push:
