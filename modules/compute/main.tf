@@ -82,7 +82,10 @@ resource "google_cloud_run_v2_service" "app" {
       env {
         name = "DB_PASSWORD"
         value_source {
-          secret_key_ref { secret = var.db_secret_id; version = "latest" }
+          secret_key_ref {
+            secret  = var.db_secret_id
+            version = "latest"
+          }
         }
       }
 
