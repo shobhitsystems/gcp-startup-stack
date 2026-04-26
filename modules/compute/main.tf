@@ -70,7 +70,10 @@ resource "google_cloud_run_v2_service" "app" {
         startup_cpu_boost = true
       }
 
-      env { name = "ENV";        value = var.env }
+      env {
+        name = "ENV"
+        value = var.env 
+      }
       env { name = "PROJECT_ID"; value = var.project_id }
 
       env {
