@@ -2,7 +2,7 @@
 set -e
 
 # --- UPDATE THESE VALUES ---
-PROJECT_ID= <<Bootstrap project ID>>
+PROJECT_ID="Your project id here"
 REGION="us-central1"
 ENV="dev"
 TF_SA_NAME="${ENV}-terraform"
@@ -78,6 +78,25 @@ gcloud iam service-accounts add-iam-policy-binding "$TF_SA_EMAIL" \
     --role="roles/iam.workloadIdentityUser" \
     --member="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/${ENV}-github-pool/attribute.repository/${GITHUB_ORG}/${GITHUB_REPO}" \
     --condition=None || true
+
+# 6. Grant org-level permissions to Terraform SA
+ORG_ID=$(gcloud projects get-ancestors "$PROJECT_ID" \
+    --format="csv(type,id)" | grep organization | cut -d',' -f2)
+
+echo "🔑 Granting org-level roles to Terraform SA..."
+gcloud organizations add-iam-policy-binding "$ORG_ID" \
+    --member="serviceAccount:$TF_SA_EMAIL" \
+    --role="roles/resourcemanager.folderCreator"
+
+gcloud organizations add-iam-policy-binding "$ORG_ID" \
+    --member="serviceAccount:$TF_SA_EMAIL" \
+    --role="roles/resourcemanager.projectCreator"
+
+gcloud organizations add-iam-policy-binding "$ORG_ID" \
+    --member="serviceAccount:$TF_SA_EMAIL" \
+    --role="roles/orgpolicy.policyAdmin"
+
+echo "✅ Terraform SA now has org-level permissions."
 
 echo "✅ Bootstrap complete!"
 echo "--------------------------------------------------"
