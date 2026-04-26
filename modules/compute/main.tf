@@ -17,10 +17,13 @@ resource "google_artifact_registry_repository" "images" {
     most_recent_versions { keep_count = 10 }
   }
   cleanup_policies {
-    id     = "delete-old-untagged"
-    action = "DELETE"
-    condition { tag_state = "UNTAGGED"; older_than = "604800s" }
+  id     = "delete-untagged-after-7-days"
+  action = "DELETE"
+  condition {
+    tag_state  = "UNTAGGED"
+    older_than = "604800s" # 7 days in seconds
   }
+}
 }
 
 # Cloud Build SA needs to push images
