@@ -89,20 +89,6 @@ module "compute" {
   depends_on    = [module.data, module.iam]
 }
 
-# ─── CI/CD: Cloud Build trigger ───────────────────────────────────────────────
-
-module "cicd" {
-  source            = "./modules/cicd"
-  project_id        = var.project_id
-  region            = var.region
-  env               = var.env
-  registry_host     = module.compute.registry_host
-  cloud_run_service = module.compute.service_name
-  github_owner      = var.github_owner
-  github_repo       = var.github_repo
-  depends_on        = [module.compute]
-}
-
 # ─── Observability: Budget alerts + Log sink ──────────────────────────────────
 
 resource "google_billing_budget" "main" {
