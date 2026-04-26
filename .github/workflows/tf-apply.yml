@@ -1,60 +1,60 @@
-name: 'Terraform Multi-Env Deploy'
+# name: 'Terraform Multi-Env Deploy'
 
-on:
-  push:
-    branches:
-      - main
-      - staging
-      - dev
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - staging
-          - prod
+# on:
+#   push:
+#     branches:
+#       - main
+#       - staging
+#       - dev
+#   workflow_dispatch:
+#     inputs:
+#       environment:
+#         description: 'Environment to deploy'
+#         required: true
+#         default: 'dev'
+#         type: choice
+#         options:
+#           - dev
+#           - staging
+#           - prod
 
-permissions:
-  contents: 'read'
-  id-token: 'write'
+# permissions:
+#   contents: 'read'
+#   id-token: 'write'
 
-jobs:
-  terraform:
-    name: 'Terraform'
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || (github.ref == 'refs/heads/staging' && 'staging') || 'dev' }}
+# jobs:
+#   terraform:
+#     name: 'Terraform'
+#     runs-on: ubuntu-latest
+#     environment: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || (github.ref == 'refs/heads/staging' && 'staging') || 'dev' }}
     
-    env:
-      TF_WORKSPACE: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || (github.ref == 'refs/heads/staging' && 'staging') || 'dev' }}
+#     env:
+#       TF_WORKSPACE: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || (github.ref == 'refs/heads/staging' && 'staging') || 'dev' }}
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
 
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          service_account: ${{ secrets.GCP_SA_EMAIL }}
+#       - name: Authenticate to Google Cloud
+#         id: auth
+#         uses: google-github-actions/auth@v2
+#         with:
+#           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+#           service_account: ${{ secrets.GCP_SA_EMAIL }}
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+#       - name: Setup Terraform
+#         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init
-        run: terraform init
+#       - name: Terraform Init
+#         run: terraform init
 
-      - name: Terraform Workspace Select/Create
-        run: |
-          terraform workspace select ${{ env.TF_WORKSPACE }} || terraform workspace new ${{ env.TF_WORKSPACE }}
+#       - name: Terraform Workspace Select/Create
+#         run: |
+#           terraform workspace select ${{ env.TF_WORKSPACE }} || terraform workspace new ${{ env.TF_WORKSPACE }}
 
-      - name: Terraform Plan
-        run: terraform plan -var-file="envs/${{ env.TF_WORKSPACE }}.tfvars"
+#       - name: Terraform Plan
+#         run: terraform plan -var-file="envs/${{ env.TF_WORKSPACE }}.tfvars"
 
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-        run: terraform apply -auto-approve -var-file="envs/${{ env.TF_WORKSPACE }}.tfvars"
+#       - name: Terraform Apply
+#         if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+#         run: terraform apply -auto-approve -var-file="envs/${{ env.TF_WORKSPACE }}.tfvars"
