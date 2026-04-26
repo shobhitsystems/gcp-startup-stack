@@ -2,7 +2,7 @@
 set -e
 
 # --- UPDATE THESE VALUES ---
-PROJECT_ID=<<Bootstrap project ID>>
+PROJECT_ID= <<Bootstrap project ID>>
 REGION="us-central1"
 ENV="dev"
 TF_SA_NAME="${ENV}-terraform"
