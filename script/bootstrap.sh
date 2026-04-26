@@ -29,8 +29,8 @@ if gsutil ls -p "$PROJECT_ID" "gs://$BUCKET_NAME" >/dev/null 2>&1; then
     echo "✅ Bucket already exists: gs://$BUCKET_NAME"
 else
     echo "🪣 Creating bucket: gs://$BUCKET_NAME"
-#    gsutil mb -p "$PROJECT_ID" -l "$REGION" "gs://$BUCKET_NAME"
-#    gsutil versioning set on "gs://$BUCKET_NAME"
+    gsutil mb -p "$PROJECT_ID" -l "$REGION" "gs://$BUCKET_NAME"
+    gsutil versioning set on "gs://$BUCKET_NAME"
 fi
 
 # 3. Create Terraform Service Account
