@@ -6,10 +6,7 @@ resource "google_artifact_registry_repository" "images" {
   repository_id = "${var.env}-images"
   format        = "DOCKER"
   description   = "Application images — managed by Terraform"
-  labels        = { 
-                    env = var.env 
-                    managed = "terraform" 
-                  }
+  labels        = { env = var.env, managed = "terraform" }
 
   cleanup_policies {
     id     = "keep-last-10"
