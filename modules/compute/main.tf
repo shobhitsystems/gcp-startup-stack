@@ -74,7 +74,10 @@ resource "google_cloud_run_v2_service" "app" {
         name = "ENV"
         value = var.env 
       }
-      env { name = "PROJECT_ID"; value = var.project_id }
+      env {
+        name = "PROJECT_ID"
+        value = var.project_id
+      }
 
       env {
         name = "DB_PASSWORD"
