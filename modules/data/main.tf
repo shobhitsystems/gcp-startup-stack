@@ -74,7 +74,13 @@ resource "google_secret_manager_secret" "db_password" {
   project   = var.project_id
   secret_id = "${var.env}-db-password"
   labels    = { env = var.env, managed = "terraform" }
-  replication { auto {} }
+  replication { 
+    user_managed {
+      replicas {
+        location = var.region
+      }
+    }
+  }
 }
 
 resource "google_secret_manager_secret_version" "db_password" {
@@ -86,7 +92,13 @@ resource "google_secret_manager_secret" "db_url" {
   project   = var.project_id
   secret_id = "${var.env}-db-url"
   labels    = { env = var.env, managed = "terraform" }
-  replication { auto {} }
+  replication { 
+    user_managed {
+      replicas {
+        location = var.region
+      }
+    }
+  }
 }
 
 resource "google_secret_manager_secret_version" "db_url" {
@@ -98,7 +110,13 @@ resource "google_secret_manager_secret" "api_key" {
   project   = var.project_id
   secret_id = "${var.env}-api-key"
   labels    = { env = var.env, managed = "terraform" }
-  replication { auto {} }
+  replication { 
+    user_managed {
+      replicas {
+        location = var.region
+      }
+    }
+  }
 }
 
 resource "google_secret_manager_secret_version" "api_key" {
