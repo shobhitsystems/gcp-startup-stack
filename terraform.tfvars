@@ -1,6 +1,6 @@
 # Copy to terraform.tfvars and fill in your values
 
-project_id         = "${{ secrets.GCP_PROJECT_ID }}"
+# project_id       = "$GCP_PROJECT_ID"
 region             = "us-cental1"
 env                = "dev"
 github_org         = "shobhitsystems"
