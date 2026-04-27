@@ -25,6 +25,14 @@ resource "google_sql_database_instance" "postgres" {
     disk_size         = 10
     disk_type         = "PD_SSD"
 
+    password_policy {
+      enable_password_policy   = true             # Enables the password policy for the instance
+      complexity               = "COMPLEXITY_DEFAULT" # Requires uppercase, lowercase, numbers, and symbols
+      min_length               = 12               # Sets minimum character count to 12
+      reuse_interval           = 10               # Prevents reuse of the last 10 passwords
+      password_change_interval = "3600s"          # Minimum 1 hour delay between password changes
+    }
+
     ip_configuration {
       ipv4_enabled                                  = false   # NO public IP
       private_network                               = var.network_self_link
