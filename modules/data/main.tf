@@ -31,6 +31,7 @@ resource "google_sql_database_instance" "postgres" {
       min_length               = 12               # Minimum 12 characters
       reuse_interval           = 10               # Can't reuse last 10 passwords
       password_change_interval = "3600s"          # 1 hour between changes
+      disallow_username_substring  = true # Prevents password from containing the username
     }
 
     ip_configuration {
