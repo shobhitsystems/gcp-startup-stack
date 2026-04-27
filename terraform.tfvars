@@ -1,7 +1,7 @@
 # Copy to terraform.tfvars and fill in your values
 
 # project_id       = "$GCP_PROJECT_ID"
-region             = "us-cental1"
+region             = "us-central1"
 env                = "dev"
 github_org         = "shobhitsystems"
 github_repo        = "gcp-startup-stack"
