@@ -22,14 +22,6 @@ locals {
         "roles/storage.objectAdmin",
       ]
     }
-    terraform = {
-      display = "Terraform SA — IaC automation"
-      roles   = [
-        "roles/editor",
-        "roles/resourcemanager.projectIamAdmin",
-        "roles/secretmanager.admin",
-      ]
-    }
   }
 }
 
