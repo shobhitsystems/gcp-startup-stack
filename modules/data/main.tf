@@ -37,6 +37,7 @@ resource "google_sql_database_instance" "postgres" {
       ipv4_enabled                                  = false   # NO public IP
       private_network                               = var.network_self_link
       enable_private_path_for_google_cloud_services = true
+      ssl_mode                                      = "ENCRYPTED_ONLY" 
     }
 
     backup_configuration {
