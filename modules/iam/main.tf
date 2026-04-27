@@ -51,7 +51,7 @@ data "google_project" "project" { project_id = var.project_id }
 
 resource "google_iam_workload_identity_pool" "github" {
   project                   = var.project_id
-  workload_identity_pool_id = "${var.env}-github-pool"
+  workload_identity_pool_id = "${var.env}-app-github-pool"
   display_name              = "GitHub Actions — ${var.env}"
   description               = "Keyless auth — no service account keys stored in GitHub"
 }
