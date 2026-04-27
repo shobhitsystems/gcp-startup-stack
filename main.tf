@@ -64,7 +64,7 @@ module "iam" {
 }
 
 # ─── Data: Cloud SQL (private, no public IP) + Secret Manager ────────────────
-
+/* Removed due to time constraints in demo
 module "data" {
   source             = "./modules/data"
   project_id         = var.project_id
@@ -74,7 +74,7 @@ module "data" {
   app_sa_email       = module.iam.app_sa_email
   depends_on         = [module.foundation]
 }
-
+*/
 # ─── Compute: Artifact Registry + Cloud Run ───────────────────────────────────
 
 module "compute" {
