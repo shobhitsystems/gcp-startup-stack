@@ -1,105 +1,67 @@
-name: '🚀 Terraform Enterprise Deploy'
-
-# ==========================================
-# 📊 PIPELINE FLOW:
-# [ 🛠️ BUILD ] ⮕ [ 🧪 TEST/VALIDATE ] ⮕ [ 📝 PLAN ] ⮕ [ 🔒 APPROVAL ] ⮕ [ 🚀 DEPLOY ]
-# ==========================================
+name: '🚀 Terraform Demo Deploy'
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch:
-    inputs:
-      confirm_apply:
-        description: '⚠️ Type "APPLY" to enable deployment'
-        required: true
-        default: 'NO'
+    branches: [ "main" ]   # Trigger on push to main branch
+  workflow_dispatch:        # Allow manual trigger from Actions tab
 
 permissions:
-  contents: 'read'
-  id-token: 'write'
+  contents: read
+  id-token: write
 
 jobs:
-  plan:
-    name: '🔍 Inspection & Planning'
+  terraform-deploy:
+    name: 'Terraform Deployment to GCP'
     runs-on: ubuntu-latest
     env:
       TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+
     steps:
-      - name: '📦 Checkout Code'
+      # -------------------------------
+      # 📂 Checkout Repository
+      # -------------------------------
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: '🔑 GCP Authentication'
-        uses: 'google-github-actions/auth@v2'
+      # -------------------------------
+      # 🔑 Authenticate with Google Cloud
+      # -------------------------------
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}'
-          service_account: '${{ secrets.GCP_SA_EMAIL }}'
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
 
-      - name: '🏗️ Setup Terraform'
+      # -------------------------------
+      # ⚙️ Setup Terraform
+      # -------------------------------
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: '⚙️ Initialize Backend'
+      # -------------------------------
+      # 📦 Initialize Terraform Backend
+      # -------------------------------
+      - name: Terraform Init
         run: |
           terraform init \
             -backend-config="bucket=${{ secrets.GCP_TF_STATE_BUCKET }}" \
             -backend-config="prefix=terraform/state"
 
-      - name: '✨ Lint & Validate'
-        run: |
-          echo "### 🎨 Formatting Check" >> $GITHUB_STEP_SUMMARY
-          terraform fmt -check && echo "✅ Passed" >> $GITHUB_STEP_SUMMARY || echo "❌ Failed" >> $GITHUB_STEP_SUMMARY
-          
-          echo "### 🛠️ Syntax Validation" >> $GITHUB_STEP_SUMMARY
-          terraform validate && echo "✅ Passed" >> $GITHUB_STEP_SUMMARY || echo "❌ Failed" >> $GITHUB_STEP_SUMMARY
+      # -------------------------------
+      # 📝 Terraform Plan
+      # -------------------------------
+      - name: Terraform Plan
+        run: terraform plan
+        continue-on-error: false
 
-      - name: '📋 Generate Execution Plan'
-        id: plan
-        run: |
-          terraform plan -no-color -out=tfplan > plan_output.txt
-          echo "### 📝 Terraform Plan Summary" >> $GITHUB_STEP_SUMMARY
-          echo '```hcl' >> $GITHUB_STEP_SUMMARY
-          grep -E "Plan:|to add|to change|to destroy" plan_output.txt >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+      # -------------------------------
+      # 🚀 Terraform Apply
+      # -------------------------------
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
 
-      - name: '💾 Archive Plan'
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan
-          path: tfplan
-
-  apply:
-    name: '🚀 Live Deployment'
-    needs: plan
-    runs-on: ubuntu-latest
-    environment: production # 🛑 This creates the fancy "Approve" button in GitHub
-    if: github.event.inputs.confirm_apply == 'APPLY' || github.event_name == 'push'
-    env:
-      TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
-    steps:
-      - name: '📦 Checkout Code'
-        uses: actions/checkout@v4
-
-      - name: '🔑 GCP Authentication'
-        uses: 'google-github-actions/auth@v2'
-        with:
-          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}'
-          service_account: '${{ secrets.GCP_SA_EMAIL }}'
-
-      - name: '🏗️ Setup Terraform'
-        uses: hashicorp/setup-terraform@v3
-
-      - name: '💾 Download Plan'
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan
-
-      - name: '⚙️ Initialize Backend'
-        run: |
-          terraform init \
-            -backend-config="bucket=${{ secrets.GCP_TF_STATE_BUCKET }}" \
-            -backend-config="prefix=terraform/state"
-
-      - name: '⚡ Execute Plan (Apply)'
-        run: |
-          terraform apply -auto-approve tfplan
-          echo "## ✅ Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+      # -------------------------------
+      # ✅ Post-Deployment Output
+      # -------------------------------
+      - name: Show Terraform Outputs
+        run: terraform output
