@@ -86,7 +86,7 @@ module "compute" {
   db_secret_id = module.data.db_password_secret_id
   api_secret_id = module.data.api_key_secret_id
   app_sa_email  = module.iam.app_sa_email
-  depends_on    = [module.data, module.iam]
+  # depends_on    = [module.data, module.iam]
 }
 
 # ─── Observability: Budget alerts + Log sink ──────────────────────────────────
