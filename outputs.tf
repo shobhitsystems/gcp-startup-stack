@@ -8,10 +8,12 @@ output "registry_path" {
   value       = module.compute.registry_path
 }
 
+/*
 output "db_connection_name" {
   description = "Cloud SQL connection name — use in --add-cloudsql-instances flag"
   value       = module.data.db_connection_name
 }
+*/
 
 output "workload_identity_provider" {
   description = "→ GitHub secret GCP_WORKLOAD_IDENTITY_PROVIDER"
