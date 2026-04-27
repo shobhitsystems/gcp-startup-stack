@@ -1,8 +1,8 @@
 name: '🚀 Terraform Demo Deploy'
 
 on:
-  push:
-    branches: [ "main" ]   # Trigger on push to main branch
+  # push:
+  #   branches: [ "main" ]   # Trigger on push to main branch
   workflow_dispatch:        # Allow manual trigger from Actions tab
 
 permissions:
