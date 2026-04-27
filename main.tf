@@ -90,7 +90,8 @@ module "compute" {
 }
 
 # ─── Observability: Budget alerts + Log sink ──────────────────────────────────
-
+## Commented out due to demo deployment
+/*
 resource "google_billing_budget" "main" {
   billing_account = var.billing_account_id
   display_name    = "${var.env}-startup-stack-budget"
@@ -115,3 +116,4 @@ resource "google_billing_budget" "main" {
     disable_default_iam_recipients   = false
   }
 }
+*/
