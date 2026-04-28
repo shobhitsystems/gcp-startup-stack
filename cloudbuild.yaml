@@ -66,22 +66,38 @@ steps:
       - -var=project_id=${PROJECT_ID}                 # no extra quotes
       - -out=plan.tfplan
 
-  # ---------------------------------------------------------------------------
-  # STEP 5 — terraform apply
-  # Applies the saved plan with no further input.
-  # Cloud Build authenticates via the deployer SA provisioned by modules/iam.
-  # Uncomment when you are ready to enable auto-apply on push to main.
-  # ---------------------------------------------------------------------------
-  # - name: hashicorp/terraform:1.8.0
-  #   id: tf-apply
-  #   entrypoint: terraform
-  #   dir: .
-  #   waitFor:
-  #     - tf-plan
-  #   args:
-  #     - apply
-  #     - -input=false
-  #     - plan.tfplan
+
+  # STEP 5 — terraform apply (only runs if _ACTION=apply)
+- name: hashicorp/terraform:1.8.0
+  id: tf-apply
+  entrypoint: sh
+  dir: .
+  waitFor: [tf-plan]
+  args:
+    - -c
+    - |
+      if [ "${_ACTION}" = "apply" ]; then
+        terraform apply -input=false plan.tfplan
+      else
+        echo "Skipping apply, action=${_ACTION}"
+      fi
+
+# STEP 6 — terraform destroy (only runs if _ACTION=destroy)
+- name: hashicorp/terraform:1.8.0
+  id: tf-destroy
+  entrypoint: sh
+  dir: .
+  waitFor: [tf-validate]
+  args:
+    - -c
+    - |
+      if [ "${_ACTION}" = "destroy" ]; then
+        terraform destroy -auto-approve -var=project_id=${PROJECT_ID}
+      else
+        echo "Skipping destroy, action=${_ACTION}"
+      fi
+
+
 
 options:
   logging: CLOUD_LOGGING_ONLY   # satisfies the service account + logs requirement
