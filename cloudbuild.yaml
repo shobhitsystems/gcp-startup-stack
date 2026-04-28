@@ -4,9 +4,7 @@
 # This pipeline is triggered by the Cloud Build trigger in modules/cicd.
 # It fires on every push to main: validate → plan → apply
 # =============================================================================
-
 steps:
-
   # ---------------------------------------------------------------------------
   # STEP 1 — terraform init
   # Downloads providers (google, google-beta, random) and all local modules.
@@ -14,11 +12,12 @@ steps:
   - name: hashicorp/terraform:1.8.0
     id: tf-init
     entrypoint: terraform
+    dir: .
     args:
       - init
       - -input=false
-      - -backend-config="bucket=${_STATE_BUCKET}"
-      - -backend-config="prefix=gcp-startup-stack/state"
+      - -backend-config=bucket=${_STATE_BUCKET}       # no extra quotes — Cloud Build substitutes before Terraform sees the value
+      - -backend-config=prefix=gcp-startup-stack/state
 
   # ---------------------------------------------------------------------------
   # STEP 2 — terraform fmt check
@@ -28,6 +27,9 @@ steps:
   - name: hashicorp/terraform:1.8.0
     id: tf-fmt
     entrypoint: terraform
+    dir: .
+    waitFor:
+      - tf-init
     args:
       - fmt
       - -check
@@ -41,6 +43,9 @@ steps:
   - name: hashicorp/terraform:1.8.0
     id: tf-validate
     entrypoint: terraform
+    dir: .
+    waitFor:
+      - tf-fmt
     args:
       - validate
 
@@ -53,25 +58,32 @@ steps:
   - name: hashicorp/terraform:1.8.0
     id: tf-plan
     entrypoint: terraform
+    dir: .
+    waitFor:
+      - tf-validate
     args:
       - plan
       - -input=false
-      - -var=project_id=${PROJECT_ID}
+      - -var=project_id=${PROJECT_ID}                 # no extra quotes
       - -out=plan.tfplan
 
   # ---------------------------------------------------------------------------
   # STEP 5 — terraform apply
   # Applies the saved plan with no further input.
   # Cloud Build authenticates via the deployer SA provisioned by modules/iam.
+  # Uncomment when you are ready to enable auto-apply on push to main.
   # ---------------------------------------------------------------------------
   # - name: hashicorp/terraform:1.8.0
   #   id: tf-apply
   #   entrypoint: terraform
+  #   dir: .
+  #   waitFor:
+  #     - tf-plan
   #   args:
   #     - apply
   #     - -input=false
   #     - plan.tfplan
-  
+
 options:
   logging: CLOUD_LOGGING_ONLY   # satisfies the service account + logs requirement
                                  # no separate logs bucket needed
