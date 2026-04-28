@@ -17,8 +17,8 @@ steps:
     args:
       - init
       - -input=false
-      - "-backend-config=bucket=${_STATE_BUCKET}"
-      - "-backend-config=prefix=gcp-startup-stack/state"
+      - -backend-config=bucket=${_STATE_BUCKET}
+      - -backend-config="prefix=gcp-startup-stack/state"
 
   # ---------------------------------------------------------------------------
   # STEP 2 — terraform fmt check
