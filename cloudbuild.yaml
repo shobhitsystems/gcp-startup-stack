@@ -1,14 +1,10 @@
 # =============================================================================
 # cloudbuild.yaml — Terraform CI/CD for gcp-startup-stack
 #
-# This pipeline is triggered by the Cloud Build trigger in modules/cicd.
-# It fires on every push to main: validate → plan → apply
+# Triggered by Cloud Build: init → fmt → validate → plan → apply/destroy
 # =============================================================================
 steps:
-  # ---------------------------------------------------------------------------
   # STEP 1 — terraform init
-  # Downloads providers (google, google-beta, random) and all local modules.
-  # ---------------------------------------------------------------------------
   - name: hashicorp/terraform:1.8.0
     id: tf-init
     entrypoint: terraform
@@ -16,91 +12,70 @@ steps:
     args:
       - init
       - -input=false
-      - -backend-config=bucket=${_STATE_BUCKET}       # no extra quotes — Cloud Build substitutes before Terraform sees the value
+      - -backend-config=bucket=${_STATE_BUCKET}
       - -backend-config=prefix=gcp-startup-stack/state
 
-  # ---------------------------------------------------------------------------
-  # STEP 2 — terraform fmt check
-  # Fails the build if any .tf file is not properly formatted.
-  # Fix locally with: terraform fmt -recursive
-  # ---------------------------------------------------------------------------
+  # STEP 2 — terraform fmt
   - name: hashicorp/terraform:1.8.0
     id: tf-fmt
     entrypoint: terraform
     dir: .
-    waitFor:
-      - tf-init
+    waitFor: [tf-init]
     args:
       - fmt
       - -recursive
 
-  # ---------------------------------------------------------------------------
   # STEP 3 — terraform validate
-  # Catches syntax errors, bad references, and type mismatches.
-  # Does NOT call any GCP APIs — safe to run on every commit.
-  # ---------------------------------------------------------------------------
   - name: hashicorp/terraform:1.8.0
     id: tf-validate
     entrypoint: terraform
     dir: .
-    waitFor:
-      - tf-fmt
+    waitFor: [tf-fmt]
     args:
       - validate
 
-  # ---------------------------------------------------------------------------
   # STEP 4 — terraform plan
-  # Shows exactly what will be created / changed / destroyed.
-  # Saves plan to plan.tfplan so apply uses the exact same plan.
-  # PROJECT_ID is injected automatically by Cloud Build.
-  # ---------------------------------------------------------------------------
   - name: hashicorp/terraform:1.8.0
     id: tf-plan
     entrypoint: terraform
     dir: .
-    waitFor:
-      - tf-validate
+    waitFor: [tf-validate]
     args:
       - plan
       - -input=false
-      - -var=project_id=${PROJECT_ID}                 # no extra quotes
+      - -var=project_id=${PROJECT_ID}
       - -out=plan.tfplan
 
-
   # STEP 5 — terraform apply (only runs if _ACTION=apply)
-- name: hashicorp/terraform:1.8.0
-  id: tf-apply
-  entrypoint: sh
-  dir: .
-  waitFor: [tf-plan]
-  args:
-    - -c
-    - |
-      if [ "${_ACTION}" = "apply" ]; then
-        terraform apply -input=false plan.tfplan
-      else
-        echo "Skipping apply, action=${_ACTION}"
-      fi
+  - name: hashicorp/terraform:1.8.0
+    id: tf-apply
+    entrypoint: sh
+    dir: .
+    waitFor: [tf-plan]
+    args:
+      - -c
+      - |
+        if [ "${_ACTION}" = "apply" ]; then
+          terraform apply -input=false plan.tfplan
+        else
+          echo "Skipping apply, action=${_ACTION}"
+        fi
 
-# STEP 6 — terraform destroy (only runs if _ACTION=destroy)
-- name: hashicorp/terraform:1.8.0
-  id: tf-destroy
-  entrypoint: sh
-  dir: .
-  waitFor: [tf-validate]
-  args:
-    - -c
-    - |
-      if [ "${_ACTION}" = "destroy" ]; then
-        terraform destroy -auto-approve -var=project_id=${PROJECT_ID}
-      else
-        echo "Skipping destroy, action=${_ACTION}"
-      fi
-
-
+  # STEP 6 — terraform destroy (only runs if _ACTION=destroy)
+  - name: hashicorp/terraform:1.8.0
+    id: tf-destroy
+    entrypoint: sh
+    dir: .
+    waitFor: [tf-validate]
+    args:
+      - -c
+      - |
+        if [ "${_ACTION}" = "destroy" ]; then
+          terraform destroy -auto-approve -var=project_id=${PROJECT_ID}
+        else
+          echo "Skipping destroy, action=${_ACTION}"
+        fi
 
 options:
-  logging: CLOUD_LOGGING_ONLY   # satisfies the service account + logs requirement
-                                 # no separate logs bucket needed
-
-timeout: 1800s  # 30 min — Cloud SQL takes ~10 min on first apply
+  logging: CLOUD_LOGGING_ONLY
+timeout: 1800s
