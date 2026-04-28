@@ -17,7 +17,7 @@ steps:
     args:
       - init
       - -input=false
-      - -backend-config=bucket=${PROJECT_ID}-tfstate
+      - -backend-config=bucket=${_STATE_BUCKET}
       - -backend-config=prefix=gcp-startup-stack/state
 
   # ---------------------------------------------------------------------------
