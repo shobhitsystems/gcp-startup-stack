@@ -16,7 +16,6 @@ steps:
     args:
       - init
       - -input=false
-      - -reconfigure  
       - -backend-config=bucket=${_STATE_BUCKET}       # no extra quotes — Cloud Build substitutes before Terraform sees the value
       - -backend-config=prefix=gcp-startup-stack/state
 
