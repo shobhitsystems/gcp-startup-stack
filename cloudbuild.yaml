@@ -1,6 +1,8 @@
 # =============================================================================
 # cloudbuild.yaml — Terraform CI/CD for gcp-startup-stack
 #
+# Place at the root of the repo (same level as main.tf).
+#
 # This pipeline is triggered by the Cloud Build trigger in modules/cicd.
 # It fires on every push to main: validate → plan → apply
 # =============================================================================
@@ -64,12 +66,16 @@ steps:
   # Applies the saved plan with no further input.
   # Cloud Build authenticates via the deployer SA provisioned by modules/iam.
   # ---------------------------------------------------------------------------
-  # - name: hashicorp/terraform:1.8.0
-  #   id: tf-apply
-  #   entrypoint: terraform
-  #   args:
-  #     - apply
-  #     - -input=false
-  #     - plan.tfplan
+  - name: hashicorp/terraform:1.8.0
+    id: tf-apply
+    entrypoint: terraform
+    args:
+      - apply
+      - -input=false
+      - plan.tfplan
+
+options:
+  logging: CLOUD_LOGGING_ONLY   # satisfies the service account + logs requirement
+                                 # no separate logs bucket needed
 
 timeout: 1800s  # 30 min — Cloud SQL takes ~10 min on first apply
