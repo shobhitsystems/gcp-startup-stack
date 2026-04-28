@@ -62,12 +62,12 @@ steps:
   # Applies the saved plan with no further input.
   # Cloud Build authenticates via the deployer SA provisioned by modules/iam.
   # ---------------------------------------------------------------------------
-  - name: hashicorp/terraform:1.8.0
-    id: tf-apply
-    entrypoint: terraform
-    args:
-      - apply
-      - -input=false
-      - plan.tfplan
+  # - name: hashicorp/terraform:1.8.0
+  #   id: tf-apply
+  #   entrypoint: terraform
+  #   args:
+  #     - apply
+  #     - -input=false
+  #     - plan.tfplan
 
 timeout: 1800s  # 30 min — Cloud SQL takes ~10 min on first apply
