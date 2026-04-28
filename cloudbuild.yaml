@@ -1,8 +1,6 @@
 # =============================================================================
 # cloudbuild.yaml — Terraform CI/CD for gcp-startup-stack
 #
-# Place at the root of the repo (same level as main.tf).
-#
 # This pipeline is triggered by the Cloud Build trigger in modules/cicd.
 # It fires on every push to main: validate → plan → apply
 # =============================================================================
