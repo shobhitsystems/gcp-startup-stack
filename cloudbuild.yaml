@@ -1,0 +1,73 @@
+# =============================================================================
+# cloudbuild.yaml — Terraform CI/CD for gcp-startup-stack
+#
+# This pipeline is triggered by the Cloud Build trigger in modules/cicd.
+# It fires on every push to main: validate → plan → apply
+# =============================================================================
+
+steps:
+
+  # ---------------------------------------------------------------------------
+  # STEP 1 — terraform init
+  # Downloads providers (google, google-beta, random) and all local modules.
+  # ---------------------------------------------------------------------------
+  - name: hashicorp/terraform:1.8.0
+    id: tf-init
+    entrypoint: terraform
+    args:
+      - init
+      - -input=false
+
+  # ---------------------------------------------------------------------------
+  # STEP 2 — terraform fmt check
+  # Fails the build if any .tf file is not properly formatted.
+  # Fix locally with: terraform fmt -recursive
+  # ---------------------------------------------------------------------------
+  - name: hashicorp/terraform:1.8.0
+    id: tf-fmt
+    entrypoint: terraform
+    args:
+      - fmt
+      - -check
+      - -recursive
+
+  # ---------------------------------------------------------------------------
+  # STEP 3 — terraform validate
+  # Catches syntax errors, bad references, and type mismatches.
+  # Does NOT call any GCP APIs — safe to run on every commit.
+  # ---------------------------------------------------------------------------
+  - name: hashicorp/terraform:1.8.0
+    id: tf-validate
+    entrypoint: terraform
+    args:
+      - validate
+
+  # ---------------------------------------------------------------------------
+  # STEP 4 — terraform plan
+  # Shows exactly what will be created / changed / destroyed.
+  # Saves plan to plan.tfplan so apply uses the exact same plan.
+  # PROJECT_ID is injected automatically by Cloud Build.
+  # ---------------------------------------------------------------------------
+  - name: hashicorp/terraform:1.8.0
+    id: tf-plan
+    entrypoint: terraform
+    args:
+      - plan
+      - -input=false
+      - -var=project_id=${PROJECT_ID}
+      - -out=plan.tfplan
+
+  # ---------------------------------------------------------------------------
+  # STEP 5 — terraform apply
+  # Applies the saved plan with no further input.
+  # Cloud Build authenticates via the deployer SA provisioned by modules/iam.
+  # ---------------------------------------------------------------------------
+  # - name: hashicorp/terraform:1.8.0
+  #   id: tf-apply
+  #   entrypoint: terraform
+  #   args:
+  #     - apply
+  #     - -input=false
+  #     - plan.tfplan
+
+timeout: 1800s  # 30 min — Cloud SQL takes ~10 min on first apply
