@@ -39,8 +39,8 @@ Deploy a complete Google Cloud stack with a single `terraform apply` — Cloud R
 │  │                                                      │   │
 │  │  on: push to main                                    │   │
 │  │    1. Authenticate via WIF (no stored keys)          │   │
-│  │    2. docker build + push → Artifact Registry        │   │
-│  │    3. gcloud run deploy → Cloud Run                  │   │
+│  │                                                      │
+│  │    2. deploy → Cloud Run                             │
 │  └──────────────┬───────────────────────────────────────┘   │
 │                 │ Workload Identity Federation               │
 └─────────────────┼───────────────────────────────────────────┘
@@ -151,18 +151,7 @@ github_org  = "your-github-username"
 github_repo = "your-repo-name"
 ```
 
-### 2. Deploy infrastructure
-
-```bash
-terraform init \
-  -backend-config="bucket=YOUR_TF_STATE_BUCKET" \
-  -backend-config="prefix=gcp-startup-stack"
-
-terraform plan
-terraform apply   # type "yes" — ~12 minutes
-```
-
-### 3. Configure GitHub Actions
+### 2. Configure GitHub Actions
 
 Run `terraform output summary` and add these to **GitHub → Settings → Secrets → Actions**:
 
@@ -174,7 +163,8 @@ Run `terraform output summary` and add these to **GitHub → Settings → Secret
 | `GCP_REGION` | `asia-south1` |
 | `TF_STATE_BUCKET` | your GCS bucket name |
 
-### 4. Trigger your first deploy
+
+### 3. Trigger your first deploy
 
 Push any change to `main` — GitHub Actions will authenticate via Workload Identity Federation, build and push the Docker image to Artifact Registry, and deploy to Cloud Run automatically.
 
