@@ -40,7 +40,7 @@ Deploy a complete Google Cloud stack with a single `terraform apply` — Cloud R
 │  │  on: push to main                                    │   │
 │  │    1. Authenticate via WIF (no stored keys)          │   │
 │  │                                                      │
-│  │    2. deploy → Cloud Run                             │
+│  │    2. deploy → using Terraform                             │
 │  └──────────────┬───────────────────────────────────────┘   │
 │                 │ Workload Identity Federation               │
 └─────────────────┼───────────────────────────────────────────┘
