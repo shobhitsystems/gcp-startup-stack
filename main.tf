@@ -22,12 +22,6 @@ provider "google-beta" {
   region  = var.region
 }
 
-terraform {
-  backend "gcs" {
-    # Leave this empty 
-  }
-}
-
 # ─── Enable all required APIs up front ───────────────────────────────────────
 
 resource "google_project_service" "apis" {
