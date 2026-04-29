@@ -76,6 +76,18 @@ steps:
           echo "Skipping destroy, action=${_ACTION}"
         fi
 
+  # STEP 7 — release temporary hold on Terraform lock file
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: release-hold
+    entrypoint: sh
+    dir: .
+    waitFor: [tf-apply, tf-destroy]
+    args:
+      - -c
+      - |
+        echo "Releasing temporary hold on Terraform lock file..."
+        gsutil retention temp release gs://${_STATE_BUCKET}/gcp-startup-stack/state/default.tflock || echo "No hold found, skipping."
+
 options:
   logging: CLOUD_LOGGING_ONLY
 timeout: 7200s
