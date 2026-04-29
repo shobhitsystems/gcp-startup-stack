@@ -1,9 +1,14 @@
 terraform {
   required_version = ">= 1.5.0"
   required_providers {
-    google      = { source = "hashicorp/google",      version = "~> 5.0" }
+    google      = { source = "hashicorp/google", version = "~> 5.0" }
     google-beta = { source = "hashicorp/google-beta", version = "~> 5.0" }
-    random      = { source = "hashicorp/random",      version = "~> 3.0" }
+    random      = { source = "hashicorp/random", version = "~> 3.0" }
+  }
+
+  backend "gcs" {
+    # Leave this empty — bucket and prefix are passed via -backend-config
+    # in GitHub Actions (see .github/workflows/deploy.yml)
   }
 }
 
@@ -28,9 +33,7 @@ terraform {
 resource "google_project_service" "apis" {
   for_each = toset([
     "compute.googleapis.com",
-    "container.googleapis.com",
     "run.googleapis.com",
-    "cloudbuild.googleapis.com",
     "artifactregistry.googleapis.com",
     "sqladmin.googleapis.com",
     "secretmanager.googleapis.com",
@@ -43,6 +46,7 @@ resource "google_project_service" "apis" {
     "cloudtrace.googleapis.com",
     "billingbudgets.googleapis.com",
   ])
+
   project            = var.project_id
   service            = each.value
   disable_on_destroy = false
@@ -51,54 +55,62 @@ resource "google_project_service" "apis" {
 # ─── Foundation: VPC + Subnets + NAT ─────────────────────────────────────────
 
 module "foundation" {
-  source     = "./modules/foundation"
+  source = "./modules/foundation"
+
   project_id = var.project_id
   region     = var.region
   env        = var.env
+
   depends_on = [google_project_service.apis]
 }
 
 # ─── IAM: Service accounts + Workload Identity Federation ────────────────────
 
 module "iam" {
-  source        = "./modules/iam"
-  project_id    = var.project_id
-  env           = var.env
-  github_org    = var.github_org
-  github_repo   = var.github_repo
-  depends_on    = [google_project_service.apis]
+  source = "./modules/iam"
+
+  project_id  = var.project_id
+  env         = var.env
+  github_org  = var.github_org
+  github_repo = var.github_repo
+
+  depends_on = [google_project_service.apis]
 }
 
 # ─── Data: Cloud SQL (private, no public IP) + Secret Manager ────────────────
 
 module "data" {
-  source             = "./modules/data"
-  project_id         = var.project_id
-  region             = var.region
-  env                = var.env
-  network_self_link  = module.foundation.network_self_link
-  app_sa_email       = module.iam.app_sa_email
-  depends_on         = [module.foundation]
+  source = "./modules/data"
+
+  project_id        = var.project_id
+  region            = var.region
+  env               = var.env
+  network_self_link = module.foundation.network_self_link
+  app_sa_email      = module.iam.app_sa_email
+
+  depends_on = [module.foundation]
 }
 
-# ─── Compute: Artifact Registry + Cloud Run ───────────────────────────────────
+# ─── Compute: Artifact Registry + Cloud Run ──────────────────────────────────
 
 module "compute" {
-  source       = "./modules/compute"
-  project_id   = var.project_id
-  region       = var.region
-  env          = var.env
-  network_name = module.foundation.network_name
-  db_secret_id = module.data.db_password_secret_id
+  source = "./modules/compute"
+
+  project_id    = var.project_id
+  region        = var.region
+  env           = var.env
+  network_name  = module.foundation.network_name
+  db_secret_id  = module.data.db_password_secret_id
   api_secret_id = module.data.api_key_secret_id
   app_sa_email  = module.iam.app_sa_email
-  depends_on    = [module.data, module.iam]
+
+  depends_on = [module.data, module.iam]
 }
 
-# ─── Observability: Budget alerts + Log sink ──────────────────────────────────
-## Commented out due to demo deployment
-/*
+# ─── Budget alerts ────────────────────────────────────────────────────────────
+
 resource "google_billing_budget" "main" {
+  count           = var.billing_account_id != "" ? 1 : 0
   billing_account = var.billing_account_id
   display_name    = "${var.env}-startup-stack-budget"
 
@@ -122,4 +134,3 @@ resource "google_billing_budget" "main" {
     disable_default_iam_recipients   = false
   }
 }
-*/

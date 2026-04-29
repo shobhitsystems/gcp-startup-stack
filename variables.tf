@@ -16,17 +16,17 @@ variable "env" {
 }
 
 variable "github_org" {
-  description = "GitHub organisation name for Workload Identity + Cloud Build trigger"
+  description = "GitHub organisation name or username (for Workload Identity Federation)"
   type        = string
 }
 
 variable "github_repo" {
-  description = "GitHub repository name"
+  description = "GitHub repository name (for Workload Identity Federation)"
   type        = string
 }
 
 variable "billing_account_id" {
-  description = "GCP Billing Account ID for budget alerts (format: XXXXXX-XXXXXX-XXXXXX)"
+  description = "GCP Billing Account ID for budget alerts (format: XXXXXX-XXXXXX-XXXXXX). Leave blank to skip budget alerts."
   type        = string
   default     = ""
 }
