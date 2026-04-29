@@ -2,7 +2,7 @@
 
 > **One command. Eight components. Production-ready GCP infrastructure for startups.**
 
-Deploy a complete, battle-hardened Google Cloud stack with a single `terraform apply` — Cloud Run, Cloud SQL, Secret Manager, Workload Identity Federation, VPC, IAM, and more, all wired up out of the box.
+Deploy a complete Google Cloud stack with a single `terraform apply` — Cloud Run, Cloud SQL, Secret Manager, Workload Identity Federation, VPC, IAM, and more, all wired together out of the box. CI/CD via GitHub Actions.
 
 [![Terraform](https://img.shields.io/badge/Terraform-≥1.5.0-7B42BC?logo=terraform)](https://developer.hashicorp.com/terraform/install)
 [![GCP](https://img.shields.io/badge/Google_Cloud-Ready-4285F4?logo=google-cloud)](https://cloud.google.com)
@@ -15,38 +15,63 @@ Deploy a complete, battle-hardened Google Cloud stack with a single `terraform a
 | Component | Details |
 |---|---|
 | **VPC** | Private subnet, Cloud NAT, Cloud Router, VPC connector for Cloud Run |
-| **Cloud Run** | Sample app — publicly accessible, auto-scales 0 → 10 instances |
-| **Cloud SQL (PostgreSQL 15)** | Private IP only (no public endpoint), automated backups, PITR enabled |
+| **Cloud Run** | Publicly accessible, auto-scales 0 → 10 instances |
+| **Cloud SQL (PostgreSQL 15)** | Private IP only — no public endpoint, automated backups, PITR |
 | **Artifact Registry** | Docker image repo with auto-cleanup policies |
 | **Secret Manager** | DB password + API key — injected into Cloud Run at startup, zero `.env` files |
 | **IAM** | 3 least-privilege service accounts: `app`, `deployer`, `terraform` |
-| **Workload Identity Federation** | GitHub Actions authenticates to GCP with zero stored keys |
-| **Budget alerts** | Email at 50%, 80%, 100% of monthly spend |
+| **Workload Identity Federation** | GitHub Actions authenticates to GCP — zero stored JSON keys |
+| **Budget alerts** | Email notifications at 50%, 80%, 100% of monthly spend |
 
-**Deploy time: ~12 minutes** (Cloud SQL provisioning takes ~8 min)
-
-> **CI/CD note:** Cloud Build trigger is intentionally excluded for now — deploy your app manually after `terraform apply` using the commands printed in `terraform output summary`. Cloud Build can be wired in as a next step once the base infrastructure is confirmed stable.
+**Deploy time: ~12 minutes** (Cloud SQL takes ~8 min to provision)
 
 ---
 
 ## Architecture
 
 ```
-GitHub Actions
-     │  (WIF — no stored keys)
-     ▼
-  gcloud / docker CLI
-     │
-     ├──► Artifact Registry  (docker push)
-     │
-     └──► Cloud Run  ◄── Public HTTPS
-               │
-        ┌──────┴──────┐
-        ▼             ▼
-    Cloud SQL    Secret Manager
-   (private IP)  (DB pwd, API key)
-
-All compute resources sit inside a private VPC.
+┌─────────────────────────────────────────────────────────────┐
+│  GitHub                                                      │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  GitHub Actions                                      │   │
+│  │  .github/workflows/deploy.yml                        │   │
+│  │                                                      │   │
+│  │  on: push to main                                    │   │
+│  │    1. Authenticate via WIF (no stored keys)          │   │
+│  │    2. docker build + push → Artifact Registry        │   │
+│  │    3. gcloud run deploy → Cloud Run                  │   │
+│  └──────────────┬───────────────────────────────────────┘   │
+│                 │ Workload Identity Federation               │
+└─────────────────┼───────────────────────────────────────────┘
+                  │
+┌─────────────────▼───────────────────────────────────────────┐
+│  GCP Project                                                │
+│                                                             │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │  module: iam                                          │  │
+│  │  • app SA  • deployer SA  • WIF pool + provider       │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                                                             │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │  module: compute                                      │  │
+│  │  • Artifact Registry   • Cloud Run (public HTTPS)     │  │
+│  └────────────────────┬─────────────────────────────────┘  │
+│                       │ private VPC                         │
+│  ┌────────────────────▼─────────────────────────────────┐  │
+│  │  module: foundation                                   │  │
+│  │  • VPC  • Private subnet  • Cloud NAT  • Cloud Router │  │
+│  │  • VPC connector (Cloud Run ↔ Cloud SQL)              │  │
+│  └────────────────────┬─────────────────────────────────┘  │
+│                       │                                     │
+│  ┌────────────────────▼─────────────────────────────────┐  │
+│  │  module: data                                         │  │
+│  │  • Cloud SQL PostgreSQL 15  (private IP only)         │  │
+│  │  • Secret Manager  (DB password, DB URL, API key)     │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                                                             │
+│  Budget alerts: 50% / 80% / 100%                           │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -58,17 +83,20 @@ git clone https://github.com/shobhitsystems/gcp-startup-stack
 cd gcp-startup-stack
 
 cp terraform.tfvars.example terraform.tfvars
-# edit: project_id, github_org, github_repo
+# fill in: project_id, github_org, github_repo
 
-terraform init
-terraform apply   # ~12 minutes — type "yes" when prompted
+terraform init \
+  -backend-config="bucket=YOUR_TF_STATE_BUCKET" \
+  -backend-config="prefix=gcp-startup-stack"
+
+terraform apply   # ~12 minutes
 ```
 
 After deploy:
 
 ```bash
-terraform output app_url      # live URL of the Cloud Run service
-terraform output summary      # full deploy summary + manual deploy commands
+terraform output app_url     # live Cloud Run URL
+terraform output summary     # full summary + GitHub secrets to add
 ```
 
 ---
@@ -81,7 +109,8 @@ terraform output summary      # full deploy summary + manual deploy commands
   gcloud auth application-default login
   ```
 - A **GCP project** with billing enabled
-- A **GitHub account** (for Workload Identity)
+- A **GCS bucket** for Terraform remote state
+- A **GitHub repository** (for Workload Identity + GitHub Actions)
 
 **Enable APIs** (one-time, ~60 seconds):
 
@@ -95,9 +124,18 @@ gcloud services enable \
   --project=YOUR_PROJECT_ID
 ```
 
+**Create Terraform state bucket** (one-time):
+
+```bash
+gcloud storage buckets create gs://YOUR_TF_STATE_BUCKET \
+  --project=YOUR_PROJECT_ID \
+  --location=asia-south1 \
+  --uniform-bucket-level-access
+```
+
 ---
 
-## Step-by-step deploy
+## Deploy step by step
 
 ### 1. Configure
 
@@ -107,7 +145,7 @@ cp terraform.tfvars.example terraform.tfvars
 
 ```hcl
 project_id  = "your-gcp-project-id"
-region      = "asia-south1"    # Mumbai — change if needed
+region      = "asia-south1"
 env         = "demo"
 github_org  = "your-github-username"
 github_repo = "your-repo-name"
@@ -116,45 +154,34 @@ github_repo = "your-repo-name"
 ### 2. Deploy infrastructure
 
 ```bash
-terraform init
-terraform plan    # review what will be created
-terraform apply   # type "yes" — takes ~12 minutes
+terraform init \
+  -backend-config="bucket=YOUR_TF_STATE_BUCKET" \
+  -backend-config="prefix=gcp-startup-stack"
+
+terraform plan
+terraform apply   # type "yes" — ~12 minutes
 ```
 
-Resources are created in this order:
-1. VPC, subnet, Cloud NAT, Cloud Router, VPC connector
-2. VPC peering for Cloud SQL private IP
-3. 3 service accounts + IAM bindings + Workload Identity pool
-4. Cloud SQL PostgreSQL (~8 min)
-5. Secrets in Secret Manager (DB password, DB URL, API key)
-6. Artifact Registry repository
-7. Cloud Run service
+### 3. Configure GitHub Actions
 
-### 3. Deploy the sample app
+Run `terraform output summary` and add these to **GitHub → Settings → Secrets → Actions**:
 
-Run the commands printed by `terraform output summary`:
+| Secret | Value |
+|---|---|
+| `GCP_WORKLOAD_IDENTITY_PROVIDER` | from `terraform output workload_identity_provider` |
+| `GCP_SERVICE_ACCOUNT` | from `terraform output deployer_sa_email` |
+| `GCP_PROJECT_ID` | your project ID |
+| `GCP_REGION` | `asia-south1` |
+| `TF_STATE_BUCKET` | your GCS bucket name |
 
-```bash
-# Authenticate Docker to Artifact Registry
-gcloud auth configure-docker asia-south1-docker.pkg.dev
+### 4. Trigger your first deploy
 
-# Build and push
-docker build -t asia-south1-docker.pkg.dev/YOUR_PROJECT/demo-images/app:latest ./sample-app
-docker push asia-south1-docker.pkg.dev/YOUR_PROJECT/demo-images/app:latest
+Push any change to `main` — GitHub Actions will authenticate via Workload Identity Federation, build and push the Docker image to Artifact Registry, and deploy to Cloud Run automatically.
 
-# Deploy to Cloud Run
-gcloud run deploy demo-app \
-  --image=asia-south1-docker.pkg.dev/YOUR_PROJECT/demo-images/app:latest \
-  --region=asia-south1
+Watch the run at:
 ```
-
-### 4. Visit the live app
-
-```bash
-terraform output app_url
+https://github.com/YOUR_ORG/YOUR_REPO/actions
 ```
-
-The URL opens a dashboard showing the environment, Cloud Run revision, and secrets loaded live from Secret Manager (masked).
 
 ---
 
@@ -163,21 +190,19 @@ The URL opens a dashboard showing the environment, Cloud Run revision, and secre
 ```
 gcp-startup-stack/
 ├── main.tf                        # wires all modules, enables APIs, budget alert
-├── variables.tf                   # project_id, region, env, github_org, github_repo
-├── outputs.tf                     # app_url, deploy summary, WIF outputs
-├── terraform.tfvars.example       # copy to terraform.tfvars and fill in
+├── variables.tf                   # input variables
+├── outputs.tf                     # app_url, WIF values, deploy summary
+├── terraform.tfvars.example       # copy → terraform.tfvars and fill in
 │
-├── modules/
-│   ├── foundation/                # VPC, subnet, NAT, VPC peering, VPC connector
-│   ├── iam/                       # 3 service accounts, IAM bindings, WIF pool + provider
-│   ├── data/                      # Cloud SQL PostgreSQL + 3 Secret Manager secrets
-│   └── compute/                   # Artifact Registry + Cloud Run service
+├── .github/
+│   └── workflows/
+│       └── deploy.yml             # GitHub Actions: WIF auth → build → push → deploy
 │
-└── sample-app/
-    ├── server.js                  # Node.js app — reads secrets, shows stack info
-    ├── test.js                    # unit tests
-    ├── package.json
-    └── Dockerfile
+└── modules/
+    ├── foundation/                # VPC, subnet, Cloud NAT, Cloud Router, VPC connector
+    ├── iam/                       # 3 service accounts, IAM bindings, WIF pool + provider
+    ├── data/                      # Cloud SQL PostgreSQL + Secret Manager secrets
+    └── compute/                   # Artifact Registry + Cloud Run service
 ```
 
 ---
@@ -215,25 +240,24 @@ gcp-startup-stack/
 → Run the `gcloud services enable ...` command in prerequisites.
 
 **Cloud SQL times out during apply**
-→ Re-run `terraform apply` — it's idempotent. Cloud SQL can take up to 10 minutes to provision.
+→ Re-run `terraform apply` — it's idempotent. Cloud SQL can take up to 10 minutes.
 
-**Cloud Run returns 403 after deploy**
+**Cloud Run returns 403**
 → Make the service public:
 ```bash
 gcloud run services add-iam-policy-binding demo-app \
   --region=asia-south1 --member=allUsers --role=roles/run.invoker
 ```
 
-**`docker push` returns 403**
-→ Run `gcloud auth configure-docker asia-south1-docker.pkg.dev` first.
+**GitHub Actions: `Error: google-github-actions/auth failed`**
+→ Check that `GCP_WORKLOAD_IDENTITY_PROVIDER` and `GCP_SERVICE_ACCOUNT` match exactly what `terraform output` printed. A trailing space will break it.
 
 ---
 
 ## Teardown
 
 ```bash
-terraform destroy   # removes all resources — type "yes"
-# takes ~5 minutes
+terraform destroy   # removes all resources — type "yes" (~5 minutes)
 ```
 
 ---

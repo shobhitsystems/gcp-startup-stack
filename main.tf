@@ -5,6 +5,11 @@ terraform {
     google-beta = { source = "hashicorp/google-beta", version = "~> 5.0" }
     random      = { source = "hashicorp/random", version = "~> 3.0" }
   }
+
+  backend "gcs" {
+    # Leave this empty — bucket and prefix are passed via -backend-config
+    # in GitHub Actions (see .github/workflows/deploy.yml)
+  }
 }
 
 provider "google" {
