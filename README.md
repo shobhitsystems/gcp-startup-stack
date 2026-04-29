@@ -15,7 +15,6 @@ This is the showpiece demo. One command deploys everything a funded startup need
 | Secret Manager | DB password + API key — injected into Cloud Run at startup, no `.env` files |
 | IAM | 3 least-privilege service accounts: `app`, `deployer`, `terraform` |
 | Workload Identity Federation | GitHub Actions authenticates to GCP with zero stored keys |
-| Cloud Build trigger | On every push to main: test → build → Trivy scan → deploy → smoke test → rollback |
 | Budget alerts | Email notifications at 50%, 80%, 100% of monthly spend |
 
 **Time to deploy: ~12 minutes**
@@ -58,11 +57,6 @@ gcloud services enable \
   --project=YOUR_PROJECT_ID
 ```
 
-Connect GitHub to Cloud Build (one-time, in the Console):
-```
-Cloud Build → Triggers → Connect Repository → GitHub → Authorize → select your repo
-```
-
 ---
 
 ## Deploy step by step
@@ -100,7 +94,6 @@ terraform apply  # type "yes" — takes ~12 minutes
 6. 3 secrets in Secret Manager (DB password, DB URL, API key)
 7. Artifact Registry repository
 8. Cloud Run service (starts with placeholder image)
-9. Cloud Build trigger
 
 ### Step 3 — View the live app
 
@@ -140,14 +133,6 @@ Watch it build:
 https://console.cloud.google.com/cloud-build/builds?project=YOUR_PROJECT_ID
 ```
 
-The pipeline runs these 6 steps automatically:
-1. `npm test` — unit tests
-2. `docker build` — tagged with commit SHA
-3. `trivy scan` — blocks deploy on CRITICAL CVE
-4. `docker push` — to Artifact Registry
-5. `gcloud run deploy` — zero-downtime rolling deploy
-6. smoke test + auto-rollback — health check with 5 retries
-
 ---
 
 ## Module reference
@@ -158,17 +143,13 @@ gcp-startup-stack/
 ├── variables.tf                   ← project_id, region, env, github_org, github_repo
 ├── outputs.tf                     ← app_url, workload_identity_provider, summary
 ├── modules/
-│   ├── foundation/                ← VPC, subnet, NAT, VPC peering, VPC connector
-│   ├── iam/                       ← 3 SAs, IAM bindings, WIF pool + provider
-│   ├── data/                      ← Cloud SQL PostgreSQL + 3 Secret Manager secrets
-│   ├── compute/                   ← Artifact Registry + Cloud Run service
-│   └── cicd/                      ← Cloud Build trigger
-└── sample-app/
-    ├── server.js                  ← demo Node.js app (reads secrets, shows stack info)
-    ├── test.js                    ← unit tests (run by Cloud Build)
-    ├── package.json
-    ├── Dockerfile
-    └── cloudbuild.yaml            ← 6-step pipeline: test→build→scan→push→deploy→smoke
+    ├── foundation/                ← VPC, subnet, NAT, VPC peering, VPC connector
+    ├── iam/                       ← 3 SAs, IAM bindings, WIF pool + provider
+    ├── data/                      ← Cloud SQL PostgreSQL + 3 Secret Manager secrets
+    ├── compute/                   ← Artifact Registry + Cloud Run service
+    └── cicd/                      ← Cloud Build trigger
+
+
 ```
 
 ---
@@ -212,10 +193,9 @@ gcp-startup-stack/
 | Artifact Registry (< 1 GB) | ~$0.10 |
 | Cloud NAT | ~$1 |
 | Secret Manager | ~$0.06 |
-| Cloud Build (free tier: 120 min/day) | $0 |
 | **Total** | **~$10–12/month** |
 
-For a real client environment: Cloud SQL tier upgrade + multiple Cloud Run services = $50–200/month depending on traffic. Still 60–70% cheaper than equivalent AWS setup.
+For a real client environment: Cloud SQL tier upgrade + multiple Cloud Run services = $50–200/month depending on traffic.
 
 ---
 ## Teardown
