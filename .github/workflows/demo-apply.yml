@@ -1,0 +1,67 @@
+name: '🚀 Terraform Demo Deploy'
+
+on:
+  # push:
+  #   branches: [ "main" ]   # Trigger on push to main branch
+  workflow_dispatch:        # Allow manual trigger from Actions tab
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform-deploy:
+    name: 'Terraform Deployment to GCP'
+    runs-on: ubuntu-latest
+    env:
+      TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    steps:
+      # -------------------------------
+      # 📂 Checkout Repository
+      # -------------------------------
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # -------------------------------
+      # 🔑 Authenticate with Google Cloud
+      # -------------------------------
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+      # -------------------------------
+      # ⚙️ Setup Terraform
+      # -------------------------------
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # -------------------------------
+      # 📦 Initialize Terraform Backend
+      # -------------------------------
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.GCP_TF_STATE_BUCKET }}" \
+            -backend-config="prefix=terraform/state"
+
+      # -------------------------------
+      # 📝 Terraform Plan
+      # -------------------------------
+      - name: Terraform Plan
+        run: terraform plan
+        continue-on-error: false
+
+      # -------------------------------
+      # 🚀 Terraform Apply
+      # -------------------------------
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      # -------------------------------
+      # ✅ Post-Deployment Output
+      # -------------------------------
+      - name: Show Terraform Outputs
+        run: terraform output
