@@ -1,4 +1,4 @@
-name: '🚀 Terraform Demo Deploy'
+name: '🚀 Terraform Deploy'
 
 on:
   # push:
