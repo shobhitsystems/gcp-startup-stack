@@ -1,4 +1,4 @@
-name: '💣 Terraform Demo Destroy'
+name: '💣 Terraform Destroy'
 
 on:
   workflow_dispatch:   # Manual trigger only (safety first!)
