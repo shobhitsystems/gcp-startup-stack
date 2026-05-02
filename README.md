@@ -15,7 +15,7 @@ Every resource is defined in Terraform. No console clicks. No ClickOps debt. You
 
 ## Architecture
 
-![Architecture](architecture.svg)
+![Architecture](docs/architecture.svg)
 
 ---
 
