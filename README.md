@@ -27,7 +27,7 @@ Every resource is defined in Terraform. No console clicks. No ClickOps debt. You
 | **iam** | app-sa · cicd-sa · WIF pool · GitHub OIDC provider · IAM bindings | ~1 min |
 | **data** | Cloud SQL PostgreSQL 15 (private IP) · 3 × Secret Manager secrets | ~5 min |
 | **compute** | Artifact Registry (Docker) · Cloud Run v2 service | ~2 min |
-| **cicd** | GitHub Actions trigger · Cloud Build managed SA bindings | ~1 min |
+| **cicd** | GitHub Actions trigger | ~1 min |
 | **root** | 16 project APIs · billing budget alerts (50/80/100%) | ~1 min |
 
 **Total: ~12 minutes. 24+ resources. Zero manual steps after bootstrap.**
@@ -231,7 +231,7 @@ Cloud Run v2
 
 ### `modules/cicd`
 
-Creates the GitHub Actions trigger and grants Cloud Build managed SA the roles it needs.
+Creates the GitHub Actions trigger and grants required SAs the roles they needs.
 
 ```
 GitHub Actions trigger
@@ -240,9 +240,6 @@ GitHub Actions trigger
 ├── Substitutions: PROJECT_ID · REGION · ENV · REGISTRY_HOST · SERVICE_NAME
 └── Included files: application code only (not .tf, not .md)
 
-Cloud Build managed SA grants
-├── roles/logging.logWriter
-└── roles/storage.objectViewer
 ```
 
 ---
@@ -358,7 +355,6 @@ gcp-startup-stack/
 │   └── bootstrap.sh           One-time setup: state bucket + WIF + cicd-sa
 └── .github/
     └── workflows/
-        ├── validate.yml       fmt check + terraform validate (no credentials needed)
         ├── terraform-deploy.yml   Plan + manual approval + apply
         └── terraform-destroy.yml  Guarded destroy with double confirmation
 ```
@@ -372,7 +368,6 @@ gcp-startup-stack/
 | [gcp-iam-baseline](https://github.com/shobhitsystems/gcp-iam-baseline) | Standalone IAM + WIF + Secret Manager — faster if you only need the security baseline |
 | [gcp-artifact-registry-cicd](https://github.com/shobhitsystems/gcp-artifact-registry-cicd) | Artifact Registry + GitHub Actions CI/CD pipeline |
 | [gcp-private-gke-autopilot](https://github.com/shobhitsystems/gcp-private-gke-autopilot) | Private GKE Autopilot with WIF, HPA, PDB, NetworkPolicy |
-| [gcp-cloudbuild-pipelines](https://github.com/shobhitsystems/gcp-cloudbuild-pipelines) | Cloud Build pipelines for teams staying inside GCP |
 
 ---
 
