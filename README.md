@@ -2,10 +2,9 @@
 
 > Production-ready GCP infrastructure for startups — one `terraform apply`, ~12 minutes, zero ClickOps.
 
-[![Validate](https://github.com/shobhitsystems/gcp-startup-stack/actions/workflows/validate.yml/badge.svg)](https://github.com/shobhitsystems/gcp-startup-stack/actions/workflows/validate.yml)
 [![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.5-7B42BC?logo=terraform&logoColor=white)](https://developer.hashicorp.com/terraform)
 [![Google Cloud](https://img.shields.io/badge/Google_Cloud-~5.0-4285F4?logo=googlecloud&logoColor=white)](https://registry.terraform.io/providers/hashicorp/google/latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-00d4aa.svg)](LICENSE)
+
 
 A complete, opinionated GCP foundation for seed-to-Series-A startups. Everything your team needs to run production traffic — private networking, Cloud Run, Cloud SQL, Secret Manager, Workload Identity Federation, and full observability — deployed from a single command.
 
