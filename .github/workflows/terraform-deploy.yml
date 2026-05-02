@@ -1,15 +1,17 @@
-name: '💣 Terraform Demo Destroy'
+name: '🚀 Terraform Deploy'
 
 on:
-  workflow_dispatch:   # Manual trigger only (safety first!)
+  # push:
+  #   branches: [ "main" ]   # Trigger on push to main branch
+  workflow_dispatch:        # Allow manual trigger from Actions tab
 
 permissions:
   contents: read
   id-token: write
 
 jobs:
-  terraform-destroy:
-    name: 'Terraform Destroy on GCP'
+  terraform-deploy:
+    name: 'Terraform Deployment to GCP'
     runs-on: ubuntu-latest
     env:
       TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
@@ -46,20 +48,20 @@ jobs:
             -backend-config="prefix=terraform/state"
 
       # -------------------------------
-      # 📝 Terraform Plan (Destroy)
+      # 📝 Terraform Plan
       # -------------------------------
-      - name: Terraform Plan Destroy
-        run: terraform plan -destroy
+      - name: Terraform Plan
+        run: terraform plan
         continue-on-error: false
 
       # -------------------------------
-      # 💣 Terraform Destroy
+      # 🚀 Terraform Apply
       # -------------------------------
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
 
       # -------------------------------
-      # ✅ Post-Destroy Output
+      # ✅ Post-Deployment Output
       # -------------------------------
       - name: Show Terraform Outputs
-        run: terraform output || echo "No outputs available (resources destroyed)."
+        run: terraform output
