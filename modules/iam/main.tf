@@ -12,7 +12,7 @@ locals {
       ]
     }
     deployer = {
-      display = "Deployer SA — CI/CD pipeline"
+      display = "Deployer SA — app CI/CD pipeline"
       roles   = [
         "roles/run.admin",
         "roles/artifactregistry.writer",
