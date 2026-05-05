@@ -55,10 +55,10 @@ jobs:
         continue-on-error: false
 
       # -------------------------------
-      # 🚀 Terraform Apply
+      # 🚀 Terraform Apply (Uncomment as needed)
       # -------------------------------
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+      # - name: Terraform Apply
+      #   run: terraform apply -auto-approve
 
       # -------------------------------
       # ✅ Post-Deployment Output
